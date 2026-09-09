@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && npm install && npm run build",
+  "buildCommand": "cd frontend && npm ci --legacy-peer-deps && npm run build",
   "outputDirectory": "frontend/dist",
   "framework": "vite",
   "rewrites": [
@@ -8,5 +8,6 @@
       "source": "/api/:path*",
       "destination": "/api/index.py"
     }
-  ]
+  ],
+  "installCommand": "npm install --legacy-peer-deps"
 }
