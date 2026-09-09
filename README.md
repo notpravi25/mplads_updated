@@ -2,7 +2,7 @@
 
 ## AI & Backend Decision-Support System Architecture
 
-An AI-powered analytical and decision-support backend engine designed to inspect administrative, financial, vendor, NLP similarity, and compliance risk factors across the Members of Parliament Local Area Development Scheme (MPLADS) datasets.
+An AI-powered analytical and decision-support backend engine designed to inspect administrative, financial, vendor, NLP similarity, and compliance risk factors across the Members of Parliament Local Area Development Scheme (MPLADS).
 
 ### Repository Structure
 
