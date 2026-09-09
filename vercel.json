@@ -1,16 +1,5 @@
 {
   "version": 2,
   "buildCommand": "cd frontend && npm ci --legacy-peer-deps && npm run build",
-  "installCommand": "cd frontend && npm install --legacy-peer-deps",
-  "outputDirectory": "frontend/dist",
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "/api/index.py" }
-  ],
-  "functions": {
-    "api/index.py": {
-      "includeFiles": "src/**,data/features/**,data/processed/**,data/sync_history.json,data/mlflow_model_registry.json",
-      "maxDuration": 60,
-      "memory": 1024
-    }
-  }
+  "outputDirectory": "frontend/dist"
 }
