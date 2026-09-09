@@ -40,47 +40,54 @@ _DATA_CACHE = {}
 def get_data():
     if "master" not in _DATA_CACHE:
         master_p = os.path.join(FEATURES_DIR, "master_project_risk_scores.parquet")
-        if not os.path.exists(master_p):
-            raise RuntimeError(f"Master database file missing at {master_p}")
-        df = pd.read_parquet(master_p)
+        try:
+            if os.path.exists(master_p):
+                df = pd.read_parquet(master_p)
+            else:
+                df = pd.DataFrame()
+        except Exception:
+            df = pd.DataFrame()
         _DATA_CACHE["master"] = df
-        
+
         # Build O(1) hashmap index for work details
         work_dict = {}
-        for r in df.to_dict(orient="records"):
-            work_dict[str(r["work_id"]).strip()] = clean_record_for_json(r)
+        if not df.empty and "work_id" in df.columns:
+            for r in df.to_dict(orient="records"):
+                work_dict[str(r["work_id"]).strip()] = clean_record_for_json(r)
         _DATA_CACHE["work_index"] = work_dict
-        
+
     if "duplicates" not in _DATA_CACHE:
         dup_p = os.path.join(FEATURES_DIR, "duplicate_work_candidates.parquet")
-        if os.path.exists(dup_p):
-            dups = pd.read_parquet(dup_p)
-            _DATA_CACHE["duplicates"] = dups
-            
-            # Build O(1) hashmap index for duplicate pairs
-            dup_index = {}
+        try:
+            if os.path.exists(dup_p):
+                dups = pd.read_parquet(dup_p)
+            else:
+                dups = pd.DataFrame()
+        except Exception:
+            dups = pd.DataFrame()
+        _DATA_CACHE["duplicates"] = dups
+
+        dup_index = {}
+        if not dups.empty and "work_id_1" in dups.columns:
             for r in dups.to_dict(orient="records"):
                 clean_r = clean_record_for_json(r)
                 w1, w2 = str(r["work_id_1"]).strip(), str(r["work_id_2"]).strip()
                 dup_index.setdefault(w1, []).append(clean_r)
                 dup_index.setdefault(w2, []).append(clean_r)
-            _DATA_CACHE["dup_index"] = dup_index
-        else:
-            _DATA_CACHE["duplicates"] = pd.DataFrame()
-            _DATA_CACHE["dup_index"] = {}
-            
+        _DATA_CACHE["dup_index"] = dup_index
+
     if "t1" not in _DATA_CACHE:
         t1_p = os.path.join(PROCESSED_DIR, "t1_allocated_limits.parquet")
-        if os.path.exists(t1_p):
-            _DATA_CACHE["t1"] = pd.read_parquet(t1_p)
-        else:
+        try:
+            _DATA_CACHE["t1"] = pd.read_parquet(t1_p) if os.path.exists(t1_p) else pd.DataFrame()
+        except Exception:
             _DATA_CACHE["t1"] = pd.DataFrame()
-            
+
     if "t7" not in _DATA_CACHE:
         t7_p = os.path.join(PROCESSED_DIR, "t7_calamity_consents.parquet")
-        if os.path.exists(t7_p):
-            _DATA_CACHE["t7"] = pd.read_parquet(t7_p)
-        else:
+        try:
+            _DATA_CACHE["t7"] = pd.read_parquet(t7_p) if os.path.exists(t7_p) else pd.DataFrame()
+        except Exception:
             _DATA_CACHE["t7"] = pd.DataFrame()
 
     return _DATA_CACHE
@@ -89,14 +96,20 @@ def clean_record_for_json(record):
     """Helper to convert numpy types and NaNs to standard JSON types."""
     clean = {}
     for k, v in record.items():
-        if pd.isna(v):
+        try:
+            is_null = v is None or (not isinstance(v, (str, list, dict, bool)) and pd.isna(v))
+        except (TypeError, ValueError):
+            is_null = False
+        if is_null:
             clean[k] = None
-        elif isinstance(v, (np.int64, np.int32)):
+        elif isinstance(v, (np.int64, np.int32, np.int16, np.int8)):
             clean[k] = int(v)
-        elif isinstance(v, (np.float64, np.float32)):
-            clean[k] = float(v)
+        elif isinstance(v, (np.float64, np.float32, np.float16)):
+            clean[k] = None if np.isnan(v) else float(v)
         elif isinstance(v, pd.Timestamp):
             clean[k] = v.strftime('%Y-%m-%d')
+        elif isinstance(v, np.bool_):
+            clean[k] = bool(v)
         else:
             clean[k] = v
     return clean

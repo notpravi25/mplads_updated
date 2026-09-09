@@ -8,8 +8,9 @@
   ],
   "functions": {
     "api/index.py": {
-      "includeFiles": "src/**,data/features/**,data/processed/**,data/*.json",
-      "maxDuration": 60
+      "includeFiles": "src/**,data/features/**,data/processed/**,data/sync_history.json,data/mlflow_model_registry.json",
+      "maxDuration": 60,
+      "memory": 1024
     }
   }
 }
