@@ -1,36 +1,56 @@
 # MPLADS AI-Powered Monitoring, Anomaly Detection & Risk Intelligence Platform
 
-## SIH Prototype Architecture
+## AI & Backend Decision-Support System Architecture
 
-An AI-powered monitoring and decision-support platform designed to analyze administrative, financial, project, and evidence data from the Members of Parliament Local Area Development Scheme (MPLADS).
+An AI-powered analytical and decision-support backend engine designed to inspect administrative, financial, vendor, NLP similarity, and compliance risk factors across the Members of Parliament Local Area Development Scheme (MPLADS) datasets.
 
 ### Repository Structure
 
-```
-project/
+```text
+SIH2026/
 ├── data/
-│   ├── raw/          # Original, untouched CSV/Excel datasets (T1 to T6)
-│   ├── processed/    # Cleaned, normalized, and validated data
-│   └── features/     # Feature-engineered analytical datasets
+│   ├── raw/          # Raw CSV/Excel datasets (T1 to T6)
+│   ├── processed/    # Cleaned, type-validated parquet datasets
+│   └── features/     # Feature-engineered risk matrices & duplicate match database
 ├── docs/             # Technical specifications & data dictionaries
-├── models/           # Trained models and vector index artifacts
-├── notebooks/        # Data exploration and prototyping notebooks
-├── outputs/          # Generated risk reports, metrics, and alerts
-├── src/
-│   ├── data/         # Data loading and ingestion scripts
-│   ├── preprocessing/# Data cleaning, type parsing, and validation
-│   ├── features/     # Feature extraction engines
-│   ├── modules/      # Core analytical engines (financial, vendor, duplicate, compliance)
-│   ├── risk/         # Composite risk scoring and alert generation
-│   └── utils/        # Common helpers and logging utilities
-└── tests/            # Automated test suite
+├── requirements.txt  # Python backend dependencies (FastAPI, pandas, uvicorn, scikit-learn)
+├── PROJECT_DOCUMENTATION.md # Comprehensive mathematical & architectural specification
+└── src/
+    ├── preprocessing/# Data cleaning, type parsing, and validation (cleaner.py)
+    ├── modules/      # Analytical Engines:
+    │                 #   - financial_anomaly.py (Category median ratio & expenditure z-score)
+    │                 #   - vendor_risk.py (Vendor market share concentration & payment burst)
+    │                 #   - duplicate_detection.py (TF-IDF vectorizer & cosine text similarity)
+    │                 #   - compliance_engine.py (Site photo proof & completion audit)
+    ├── risk/         # Composite Risk Engine (composite_risk_engine.py)
+    ├── backend/      # FastAPI Decision-Support API (app.py)
+    └── run_pipeline.py # Master analytical pipeline execution script
 ```
 
-### Module Development Pipeline
-1. **Module 1**: Data Foundation & Preprocessing
-2. **Module 2**: Financial & Expenditure Anomaly Detection
-3. **Module 3**: Vendor & Payment Risk Analysis
-4. **Module 4**: Potential Duplicate / Similar Work Detection (NLP)
-5. **Module 5**: Compliance & Data-Quality Monitoring
-6. **Module 6**: Risk Engine, Explainability & Alert Engine
-7. **Module 7**: Backend API & Visual Dashboard
+### Installation & Execution
+
+1. **Install Python Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Run Full AI Risk & Feature Engineering Pipeline**:
+   ```bash
+   python src/run_pipeline.py
+   ```
+
+3. **Start Backend Decision-Support API Server**:
+   ```bash
+   python src/backend/app.py
+   ```
+   Or via Uvicorn:
+   ```bash
+   uvicorn src.backend.app:app --host 127.0.0.1 --port 8000 --reload
+   ```
+
+### API Endpoints
+- `GET /api/health` - Health check and project database record count.
+- `GET /api/overview` - Portfolio-wide fund allocation, expenditure disbursals, and state/category aggregations.
+- `GET /api/risk-monitor` - Filterable audit queue sorted by composite risk score.
+- `GET /api/work-detail?work_id=WS/...` - 360° decision-support profile and evidence audit matrix for a specific work record.
+- `GET /api/duplicate-candidates` - Candidate duplicate pairs extracted via NLP cosine text similarity.

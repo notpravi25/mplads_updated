@@ -34,7 +34,6 @@ def build_master_dataset():
     })
     
     t6_summary = pd.merge(t6_work, top_vendors, on="work_id", how="left")
-    t6_summary["top_vendor_share"] = (t6_summary["top_vendor_expenditure"] / t6_summary["total_expenditure"]).fillna(0)
     
     # 2. Prepare T5 Completed Works summary
     t5_unique = t5.dropna(subset=["work_id"]).drop_duplicates(subset=["work_id"], keep="last")
@@ -45,6 +44,15 @@ def build_master_dataset():
     # 3. Base dataframe is T4 Sanctioned Works
     master = pd.merge(t4, t6_summary, on="work_id", how="left")
     master = pd.merge(master, t5_summary, on="work_id", how="left")
+    
+    # 4. Calculate Vendor Market Share (% of works awarded to vendor within constituency)
+    vendor_work_cnt = master.groupby(["constituency", "top_vendor"])["work_id"].transform("count")
+    const_total_works = master.groupby("constituency")["work_id"].transform("count")
+    master["top_vendor_share"] = np.where(
+        master["top_vendor"].notnull() & (master["top_vendor"] != "") & (const_total_works > 0),
+        vendor_work_cnt / const_total_works,
+        0.0
+    )
     
     # Derive operational & baseline features
     master["effective_expenditure"] = master["total_expenditure"].fillna(master["completed_disbursed_amount"])

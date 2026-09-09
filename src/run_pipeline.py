@@ -11,6 +11,7 @@ from src.modules.financial_anomaly import run_financial_anomaly_detection
 from src.modules.vendor_risk import run_vendor_risk_analysis
 from src.modules.duplicate_detection import run_duplicate_work_detection
 from src.modules.compliance_engine import run_compliance_engine
+from src.modules.delay_risk import run_schedule_risk_engine
 from src.risk.composite_risk_engine import run_composite_risk_engine
 
 def run_entire_pipeline():
@@ -25,7 +26,7 @@ def run_entire_pipeline():
     print("\n--- PHASE 1.5: MASTER DATASET BUILDING ---")
     build_master_dataset()
     
-    print("\n--- PHASE 2: MODULE 2 (FINANCIAL ANOMALY) ---")
+    print("\n--- PHASE 2: MODULE 2 (FINANCIAL ANOMALY ML) ---")
     run_financial_anomaly_detection()
     
     print("\n--- PHASE 2: MODULE 3 (VENDOR RISK) ---")
@@ -36,6 +37,9 @@ def run_entire_pipeline():
     
     print("\n--- PHASE 2: MODULE 5 (COMPLIANCE RULE MATRIX) ---")
     run_compliance_engine()
+
+    print("\n--- PHASE 2: MODULE 6 (SCHEDULE & PROGRESS RISK) ---")
+    run_schedule_risk_engine()
     
     print("\n--- PHASE 3: COMPOSITE RISK INTELLIGENCE & ALERT ENGINE ---")
     run_composite_risk_engine()

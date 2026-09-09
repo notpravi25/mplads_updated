@@ -121,7 +121,23 @@ def preprocess_all():
         df6.to_parquet(out6, index=False)
         print(f"[T6] Cleaned {len(df6):,} records -> {out6}")
 
+    # 6. Clean T7 - Calamity Consents
+    f_t7 = os.path.join(raw_dir, "Amount consented for Calamity.csv")
+    if os.path.exists(f_t7):
+        df7 = pd.read_csv(f_t7)
+        df7.columns = [c.strip() for c in df7.columns]
+        df7 = df7[df7["Sr. No."].astype(str).str.replace(".","").str.isdigit()].copy()
+        df7["consent_amount"] = df7["Consent Amount ( ₹ )"].apply(clean_currency)
+        df7["calamity_type"] = df7["Calamity Type"].apply(clean_text)
+        df7["calamity_name"] = df7["Calamity Name"].apply(clean_text)
+        df7["mp_name"] = df7["Hon'ble Members of Parliament"].apply(clean_text).str.upper()
+        df7["consent_date"] = pd.to_datetime(df7["Date of Consent"], errors='coerce')
+        out7 = os.path.join(processed_dir, "t7_calamity_consents.parquet")
+        df7.to_parquet(out7, index=False)
+        print(f"[T7] Cleaned {len(df7):,} records -> {out7}")
+
     print("=== PREPROCESSING COMPLETE ===")
 
 if __name__ == "__main__":
     preprocess_all()
+

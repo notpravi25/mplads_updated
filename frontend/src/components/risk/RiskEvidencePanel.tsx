@@ -1,6 +1,6 @@
 import React from 'react';
 import { WorkRecord } from '../../types';
-import { formatIndianCurrency } from '../../utils/formatters';
+import { ShieldCheck, AlertCircle, Building2 } from 'lucide-react';
 
 interface RiskEvidencePanelProps {
   work: WorkRecord;
@@ -13,112 +13,132 @@ export const RiskEvidencePanel: React.FC<RiskEvidencePanelProps> = ({ work }) =>
   const vendorShare = (work.top_vendor_share || 0) * 100;
   const hasImage = work.has_evidence_image || false;
 
+  const dimensions = [
+    {
+      title: 'Financial Risk Engine',
+      observed: `₹${(amount / 100000).toFixed(2)} Lakh`,
+      baseline: 'Category Median Baseline',
+      deviation: `${ratio.toFixed(2)}x Peer Ratio (${pct.toFixed(1)}th percentile)`,
+      isHighDev: ratio >= 2.0,
+      explanation: work.financial_explanation || 'Expenditure falls within expected baseline bounds.'
+    },
+    {
+      title: 'Vendor & Disbursal Pattern Risk',
+      observed: work.top_vendor || 'Primary Contractor',
+      baseline: `HHI: ${work.project_hhi ? work.project_hhi.toFixed(0) : '10,000'} | Single Disbursal: ${(work.single_disbursal_ratio || 100).toFixed(1)}%`,
+      deviation: `${vendorShare.toFixed(1)}% Constituency Work Share`,
+      isHighDev: (work.vendor_risk_score || 0) >= 35,
+      explanation: work.vendor_risk_explanation || 'Vendor disbursal concentration within standard limits.'
+    },
+    {
+      title: 'Duplicate Text (NLP Engine)',
+      observed: work.description || 'N/A',
+      baseline: 'Unique Text Threshold (< 70%)',
+      deviation: work.duplicate_risk_score ? `${work.duplicate_risk_score.toFixed(1)}% Match` : 'No Match',
+      isHighDev: (work.duplicate_risk_score || 0) >= 70,
+      explanation: (work.duplicate_risk_score || 0) >= 70
+        ? `Candidate duplicate description detected in ${work.Constituency} constituency.`
+        : 'Unique description text verified across database.'
+    },
+    {
+      title: 'Compliance & Evidence Gaps',
+      observed: hasImage ? 'Image Uploaded' : 'Missing Photo Evidence',
+      baseline: 'Physical Site Upload Required',
+      deviation: !hasImage && work.completion_date ? 'Missing Photo' : 'Compliant',
+      isHighDev: !hasImage && work.completion_date,
+      explanation: work.compliance_explanation || 'Site evidence requirements satisfied.'
+    },
+    {
+      title: 'Schedule & Progress Risk',
+      observed: `${work.expenditure_progress_pct || 0}% Expenditure Progress`,
+      baseline: `${work.expected_timeline_progress_pct || 0}% Expected Timeline Progress`,
+      deviation: `${work.progress_gap_pct || 0}% Progress Gap`,
+      isHighDev: (work.progress_gap_pct || 0) >= 15,
+      explanation: work.schedule_explanation || 'Schedule timeline progress aligns with financial disbursals.'
+    }
+  ];
+
   return (
-    <div className="card-panel p-6 border-slate-700 bg-slate-900/90">
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-        <div>
-          <h3 className="text-base font-semibold text-slate-100 uppercase tracking-wide">
-            Audit Evidence Breakdown ("Why Flagged?")
-          </h3>
-          <p className="text-xs text-slate-400 mt-0.5">
-            Statistical deviations, mathematical peer ratios, and compliance checks supporting the composite risk indicator.
-          </p>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
+        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
+          Multi-Signal Audit Evidence Breakdown ("Why Flagged?")
+        </h3>
+        <span className="text-xs font-mono font-bold text-slate-500">Work ID: {work.work_id}</span>
+      </div>
+
+      {/* 5 Risk Sub-Engine Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {dimensions.map((dim, idx) => (
+          <div key={idx} className="bg-white rounded-2xl border border-slate-200/80 p-5 space-y-3 shadow-sm">
+            <div className="flex justify-between items-center border-b border-slate-100 pb-2">
+              <span className="text-xs font-bold text-slate-900">{dim.title}</span>
+              <span className={`text-[10px] font-mono px-2.5 py-1 rounded-full font-bold ${
+                dim.isHighDev ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-slate-100 text-slate-700'
+              }`}>
+                {dim.deviation}
+              </span>
+            </div>
+
+            <div className="text-xs space-y-1.5 text-slate-500">
+              <div className="flex justify-between">
+                <span>Observed:</span>
+                <span className="text-slate-900 font-bold truncate max-w-[200px]">{dim.observed}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Baseline:</span>
+                <span className="text-slate-700 font-medium">{dim.baseline}</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-200/80 leading-relaxed font-medium">
+              {dim.explanation}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Responsible AI Vendor Risk Evidence Structured Box */}
+      <div className="bg-white rounded-2xl border border-amber-200 p-6 space-y-4 shadow-sm">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h4 className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-2">
+            <Building2 className="w-4 h-4 text-amber-600" /> Vendor Payment Pattern Analysis (Responsible AI Decision Support)
+          </h4>
+          <span className="text-[10px] font-mono font-bold text-slate-500 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200">Non-Accusatory Early Warning</span>
         </div>
-        <span className="text-xs font-mono text-slate-400 bg-slate-800 px-2.5 py-1 rounded border border-slate-700">
-          Work ID: {work.work_id}
-        </span>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1.5">
+            <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">1. RECORDED FACT</span>
+            <p className="text-slate-800 leading-relaxed font-medium">
+              {work.top_vendor ? `Primary vendor '${work.top_vendor}' handles ${vendorShare.toFixed(1)}% of sanctioned works in ${work.Constituency}.` : 'Single primary contractor assigned to this work.'}
+            </p>
+          </div>
+
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1.5">
+            <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">2. PATTERN INDICATORS</span>
+            <ul className="text-slate-700 space-y-1 text-[11px] list-disc list-inside font-medium">
+              <li>HHI Index: <strong className="text-slate-900 font-bold">{work.project_hhi ? work.project_hhi.toFixed(0) : '10,000'}</strong></li>
+              <li>Single Disbursal Ratio: <strong className="text-slate-900 font-bold">{(work.single_disbursal_ratio || 100).toFixed(1)}%</strong></li>
+              <li>Rapid Disbursal Window: <strong className="text-slate-900 font-bold">{work.rapid_disbursal_burst_flag ? '7-Day Burst Flagged' : 'Normal Timing'}</strong></li>
+            </ul>
+          </div>
+
+          <div className="p-4 bg-slate-50 rounded-xl border border-slate-200/80 space-y-1.5">
+            <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block">3. AUDIT INTERPRETATION</span>
+            <p className="text-slate-800 leading-relaxed text-[11px] font-medium">
+              {work.vendor_risk_interpretation || 'Expenditure concentration observed with standard payment timing. No elevated review priority required.'}
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Evidence Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs">
-          <thead>
-            <tr className="bg-slate-800/60 text-slate-300 uppercase tracking-wider text-[11px] border-b border-slate-700">
-              <th className="py-2.5 px-3">Risk Dimension</th>
-              <th className="py-2.5 px-3">Observed Value</th>
-              <th className="py-2.5 px-3">Peer / Baseline Expectation</th>
-              <th className="py-2.5 px-3">Statistical Deviation</th>
-              <th className="py-2.5 px-3">Audit Interpretation</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-800 text-slate-200">
-            {/* Financial Dimension */}
-            <tr>
-              <td className="py-3 px-3 font-semibold text-amber-400">Financial Risk</td>
-              <td className="py-3 px-3 font-mono">{formatIndianCurrency(amount)}</td>
-              <td className="py-3 px-3 text-slate-400">Category Median Baseline</td>
-              <td className="py-3 px-3">
-                <span className={`font-mono font-bold ${ratio >= 2.0 ? 'text-orange-400' : 'text-slate-300'}`}>
-                  {ratio.toFixed(2)}x Peer Ratio ({pct.toFixed(1)}th Percentile)
-                </span>
-              </td>
-              <td className="py-3 px-3 text-slate-300 leading-snug">
-                {work.financial_explanation || 'Expenditure falls within normal baseline bounds.'}
-              </td>
-            </tr>
-
-            {/* Vendor Dimension */}
-            <tr>
-              <td className="py-3 px-3 font-semibold text-orange-400">Vendor Risk</td>
-              <td className="py-3 px-3 text-slate-200">{work.top_vendor || 'N/A'}</td>
-              <td className="py-3 px-3 text-slate-400">Multi-Vendor Procurement Threshold (&lt; 25%)</td>
-              <td className="py-3 px-3 font-mono">
-                <span className={vendorShare >= 30 ? 'text-amber-400 font-bold' : 'text-slate-300'}>
-                  {vendorShare.toFixed(1)}% Disbursal Share
-                </span>
-              </td>
-              <td className="py-3 px-3 text-slate-300 leading-snug">
-                {work.vendor_risk_explanation || 'Vendor concentration within standard limits.'}
-              </td>
-            </tr>
-
-            {/* Duplicate NLP Dimension */}
-            <tr>
-              <td className="py-3 px-3 font-semibold text-indigo-400">Duplicate NLP Risk</td>
-              <td className="py-3 px-3 text-slate-300 truncate max-w-xs">{work.description || 'N/A'}</td>
-              <td className="py-3 px-3 text-slate-400">Independent Description Threshold (&lt; 70%)</td>
-              <td className="py-3 px-3 font-mono">
-                <span className={work.duplicate_risk_score >= 85 ? 'text-red-400 font-bold' : 'text-slate-300'}>
-                  {work.duplicate_risk_score ? `${work.duplicate_risk_score.toFixed(1)}% Match` : 'No Match'}
-                </span>
-              </td>
-              <td className="py-3 px-3 text-slate-300 leading-snug">
-                {work.duplicate_risk_score >= 70
-                  ? `Candidate duplicate description found in ${work.Constituency} constituency.`
-                  : 'Unique description text verified.'}
-              </td>
-            </tr>
-
-            {/* Compliance Evidence Dimension */}
-            <tr>
-              <td className="py-3 px-3 font-semibold text-emerald-400">Compliance & Evidence</td>
-              <td className="py-3 px-3 font-mono">
-                {hasImage ? (
-                  <span className="text-emerald-400 font-medium">Image Uploaded</span>
-                ) : (
-                  <span className="text-amber-400 font-medium">Missing Image</span>
-                )}
-              </td>
-              <td className="py-3 px-3 text-slate-400">Physical Site Evidence Mandatory for Completion</td>
-              <td className="py-3 px-3">
-                <span className={!hasImage && work.completion_date ? 'text-amber-400 font-bold' : 'text-emerald-400'}>
-                  {!hasImage && work.completion_date ? 'RULE_COMP_01 Triggered' : 'Compliant'}
-                </span>
-              </td>
-              <td className="py-3 px-3 text-slate-300 leading-snug">
-                {work.compliance_explanation || 'Full compliance verified.'}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-
-      {/* Reviewer Audit Action Callout */}
-      <div className="mt-5 p-4 rounded-md bg-slate-800/90 border border-slate-700 flex flex-col gap-1.5">
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-300">
-          Suggested Administrative Review Action:
+      {/* Suggested Reviewer Action */}
+      <div className="p-5 rounded-2xl bg-slate-900 text-white space-y-1.5 text-xs shadow-md">
+        <span className="font-bold text-emerald-400 uppercase tracking-wider text-[11px] block flex items-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-emerald-400" /> Recommended Administrative Review Action:
         </span>
-        <p className="text-xs text-slate-200 font-medium leading-relaxed">
+        <p className="text-slate-200 leading-relaxed font-medium">
           {work.recommended_reviewer_action || 'Perform standard periodic monitoring.'}
         </p>
       </div>
