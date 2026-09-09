@@ -28,9 +28,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-FEATURES_DIR = r"c:\Users\user\Documents\SIH2026\data\features"
-PROCESSED_DIR = r"c:\Users\user\Documents\SIH2026\data\processed"
-DATA_DIR = r"c:\Users\user\Documents\SIH2026\data"
+# Resolve paths dynamically so the backend works on any machine (including Vercel)
+_BACKEND_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+FEATURES_DIR = os.path.join(_BACKEND_ROOT, "data", "features")
+PROCESSED_DIR = os.path.join(_BACKEND_ROOT, "data", "processed")
+DATA_DIR = os.path.join(_BACKEND_ROOT, "data")
 
 # Cache loaded dataframes in memory
 _DATA_CACHE = {}

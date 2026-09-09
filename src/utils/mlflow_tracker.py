@@ -2,7 +2,9 @@ import os
 import json
 from datetime import datetime
 
-MODEL_TRACKER_FILE = r"c:\Users\user\Documents\SIH2026\data\mlflow_model_registry.json"
+MODEL_TRACKER_FILE = os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..", "..", "data", "mlflow_model_registry.json")
+)
 
 class MLflowTracker:
     """

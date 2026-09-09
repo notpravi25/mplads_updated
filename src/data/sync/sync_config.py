@@ -2,7 +2,10 @@ import os
 
 SYNC_INTERVAL_DAYS = 7  # Weekly synchronization schedule
 
-BASE_DIR = r"c:\Users\user\Documents\SIH2026"
+# Resolve BASE_DIR dynamically relative to this file's location
+# This file is at: src/data/sync/sync_config.py
+# So BASE_DIR is 3 levels up: src/data/sync -> src/data -> src -> root
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
 DATA_DIR = os.path.join(BASE_DIR, "data")
 RAW_DIR = os.path.join(DATA_DIR, "raw")
 PROCESSED_DIR = os.path.join(DATA_DIR, "processed")
