@@ -1,0 +1,11 @@
+# Exclude heavy raw datasets and snapshot backups from Vercel Serverless Function bundle
+data/raw/
+data/snapshots/
+data/processed/
+*.csv
+*.log
+.venv/
+venv/
+node_modules/
+frontend/node_modules/
+frontend/src/
